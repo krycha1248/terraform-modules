@@ -8,13 +8,7 @@ resource "http_request" "dns_record" {
     password = var.da_pass
   }
 
-  request_body = {
-    domain = var.domain
-    action = "add"
-    type   = var.record_type
-    name   = var.record_name
-    value  = var.record_value
-  }
+  request_body = "domain=${var.domain}&action=add&type=${var.record_type}&name=${var.record_name}&value=${var.record_value}"
 
   is_response_body_json   = true
   response_body_id_filter = "$.id"
@@ -25,9 +19,6 @@ resource "http_request" "dns_record" {
   delete_headers    = {
     "Content-Type" = "application/x-www-form-urlencoded"
   }
-  delete_request_body = {
-    domain = var.domain
-    action = "select"
-    arecs0 = "name=${var.record_name}"
-  }
+  delete_request_body = "domain=${var.domain}&action=select&arecs0=name=${var.record_name}"
 }
+

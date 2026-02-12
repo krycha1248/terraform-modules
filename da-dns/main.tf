@@ -3,31 +3,31 @@ resource "http_request" "dns_record" {
   base_url = var.da_host
   path     = "/CMD_API_DNS_CONTROL"
 
-  headers = {
-    "Content-Type" = "application/x-www-form-urlencoded"
-  }
-
   basic_auth = {
     username = var.da_user
     password = var.da_pass
   }
 
-  # CREATE body
-  request_body = "domain=${var.domain}&action=add&type=${var.record_type}&name=${var.record_name}&value=${var.record_value}"
-
-  is_response_body_json = false
-
-  # ---- DESTROY CONTROLS ----
-  is_delete_enabled = true
-  delete_method     = "POST"
-  delete_path       = "/CMD_API_DNS_CONTROL?domain=${var.domain}&action=select&arecs0=name=${var.record_name}&action=delete"
-
-  delete_headers = {
-    "Content-Type" = "application/x-www-form-urlencoded"
+  request_body = {
+    domain = var.domain
+    action = "add"
+    type   = var.record_type
+    name   = var.record_name
+    value  = var.record_value
   }
 
-  delete_basic_auth = {
-    username = var.da_user
-    password = var.da_pass
+  is_response_body_json   = true
+  response_body_id_filter = "$.id"
+
+  is_delete_enabled = true
+  delete_method     = "POST"
+  delete_path       = "/CMD_API_DNS_CONTROL"
+  delete_headers    = {
+    "Content-Type" = "application/x-www-form-urlencoded"
+  }
+  delete_request_body = {
+    domain = var.domain
+    action = "select"
+    arecs0 = "name=${var.record_name}"
   }
 }

@@ -1,4 +1,3 @@
-# Mapa typów rekordów → parametry selecttype w API DirectAdmin
 locals {
   selecttype_map = {
     A     = "arecs0"
@@ -32,7 +31,13 @@ resource "http_request" "dns_record" {
   delete_headers    = {
     "Content-Type" = "application/x-www-form-urlencoded"
   }
-  delete_request_body = format(
+
+  delete_request_body = var.record_type == "CNAME" ? format(
+    "domain=%s&action=select&cnamerecs0=name=%s&value=%s",
+    var.domain,
+    var.record_name,
+    var.record_value
+  ) : format(
     "domain=%s&action=select&%s=name%%3D%s%%26value%%3D%s",
     var.domain,
     lookup(local.selecttype_map, var.record_type, "arecs0"),

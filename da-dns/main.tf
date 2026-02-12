@@ -10,7 +10,7 @@ resource "http_request" "dns_record" {
 
   request_body = "domain=${var.domain}&action=add&type=${var.record_type}&name=${var.record_name}&value=${var.record_value}"
 
-  is_response_body_json   = true
+  is_response_body_json   = false
   response_body_id_filter = "$.id"
 
   is_delete_enabled = true

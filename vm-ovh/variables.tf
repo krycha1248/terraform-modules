@@ -1,4 +1,4 @@
-variable "flavour_name" {
+variable "flavor_name" {
   type = string
 }
 

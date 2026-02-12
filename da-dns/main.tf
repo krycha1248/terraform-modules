@@ -1,18 +1,3 @@
-variable "record_type" {
-  description = "Typ rekordu DNS (A, CNAME, MX, NS, PTR)"
-  type        = string
-}
-
-variable "record_name" {
-  description = "Nazwa rekordu DNS"
-  type        = string
-}
-
-variable "record_value" {
-  description = "Wartość rekordu DNS"
-  type        = string
-}
-
 # Mapa typów rekordów → parametry selecttype w API DirectAdmin
 locals {
   selecttype_map = {

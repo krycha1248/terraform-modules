@@ -32,7 +32,11 @@ resource "http_request" "dns_record" {
   delete_headers    = {
     "Content-Type" = "application/x-www-form-urlencoded"
   }
-  delete_request_body = "domain=${var.domain}&action=select&${lookup(local.selecttype_map, var.record_type, "arecs0")}=" 
-    # dodajemy zakodowaną nazwę i wartość
-    "${replace(var.record_name, ".", "%2E")}%26value%3D${var.record_value}"
+  delete_request_body = format(
+    "domain=%s&action=select&%s=name%%3D%s%%26value%%3D%s",
+    var.domain,
+    lookup(local.selecttype_map, var.record_type, "arecs0"),
+    replace(var.record_name, ".", "%2E"),
+    var.record_value
+  )
 }

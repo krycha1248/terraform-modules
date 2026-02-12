@@ -19,6 +19,6 @@ resource "http_request" "dns_record" {
   delete_headers    = {
     "Content-Type" = "application/x-www-form-urlencoded"
   }
-  delete_request_body = "domain=${var.domain}&action=select&arecs0=name%3D${var.record_name}"
+  delete_request_body = "domain=${var.domain}&action=select&arecs0=name%3D${replace(var.record_name, ".", "%2E")}"
 }
 

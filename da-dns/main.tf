@@ -58,8 +58,4 @@ resource "http_request" "dns_record" {
     "Content-Type" = "application/x-www-form-urlencoded"
   }
   delete_request_body = local.delete_body
-
-  # Retry w przypadku problemów z API (opcjonalnie)
-  retries = 3
-  retry_delay = 5
 }

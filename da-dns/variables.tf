@@ -39,3 +39,15 @@ variable "record_value" {
   description = "Record Value"
   type        = string
 }
+
+variable "record_ttl" {
+  description = "TTL for the DNS record (optional)"
+  type        = number
+  default     = null
+}
+
+variable "record_priority" {
+  description = "Priority for MX record (optional, only used for MX type)"
+  type        = number
+  default     = null
+}

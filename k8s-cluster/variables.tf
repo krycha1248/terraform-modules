@@ -78,7 +78,7 @@ variable "network_start_address" {
   description = "OVH Public Cloud Project Kubernetes cluster network start IP address"
   type        = string
   nullable    = false
-  default     = "10.0.0.1"
+  default     = "10.0.0.2"
 }
 
 variable "network_end_address" {

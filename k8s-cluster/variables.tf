@@ -67,6 +67,13 @@ variable "gateway_model" {
   default     = "s"
 }
 
+variable "gateway_ip" {
+  description = "OVH Public Cloud Project Kubernetes cluster gateway IP address"
+  type        = string
+  nullable    = false
+  default     = "10.0.0.1"
+}
+
 variable "network_cidr" {
   description = "OVH Public Cloud Project Kubernetes cluster network CIDR"
   type        = string

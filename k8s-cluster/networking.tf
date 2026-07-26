@@ -9,6 +9,7 @@ resource "ovh_cloud_project_network_private_subnet" "private_subnet" {
   service_name = ovh_cloud_project_network_private.private_network.service_name
   network_id   = ovh_cloud_project_network_private.private_network.id
   region       = var.regions[0]
+  gateway      = var.gateway_ip
   start        = var.network_start_address
   end          = var.network_end_address
   network      = var.network_cidr

@@ -7,6 +7,7 @@ output "kubernetes_config" {
 output "kubernetes_host" {
   description = "Kubernetes API server host for the cluster"
   value       = ovh_cloud_project_kube.cluster.kubeconfig_attributes[0].host
+  sensitive   = true
 }
 
 output "kubernetes_ca_certificate" {

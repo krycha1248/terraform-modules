@@ -36,7 +36,7 @@ variable "node_pool_name" {
   description = "OVH Public Cloud Project Kubernetes cluster node pool name"
   type        = string
   nullable    = false
-  default     = "Kubernetes-Node-Pool"
+  default     = "kubernetes-node-pool"
 }
 
 variable "node_pool_flavor" {

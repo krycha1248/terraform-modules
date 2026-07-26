@@ -53,13 +53,6 @@ variable "node_pool_desired_nodes" {
   default     = 1
 }
 
-variable "gateway_ip" {
-  description = "OVH Public Cloud Project Kubernetes cluster gateway IP"
-  type        = string
-  nullable    = false
-  default     = "10.0.0.1"
-}
-
 variable "gateway_name" {
   description = "OVH Public Cloud Project Kubernetes cluster gateway name"
   type        = string

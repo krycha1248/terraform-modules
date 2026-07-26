@@ -71,7 +71,7 @@ variable "network_cidr" {
   description = "OVH Public Cloud Project Kubernetes cluster network CIDR"
   type        = string
   nullable    = false
-  default     = "10.0.0.0/16"
+  default     = "10.0.0.0/24"
 }
 
 variable "network_start_address" {
@@ -85,5 +85,5 @@ variable "network_end_address" {
   description = "OVH Public Cloud Project Kubernetes cluster network end IP address"
   type        = string
   nullable    = false
-  default     = "10.0.255.254"
+  default     = "10.0.0.254"
 }

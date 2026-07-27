@@ -146,8 +146,8 @@ web:
   ingress:
     enabled: true
     ingressClassName: traefik
-    annotations: {}
-    #  kubernetes.io/tls-acme: "true"
+    annotations:
+      cert-manager.io/issuer: letsencrypt-prod
     hosts:
       - host: ${domain}
         paths:

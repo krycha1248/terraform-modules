@@ -20,7 +20,7 @@ resource "helm_release" "jitsi" {
   ]
   name       = "jitsi"
   repository = "https://jitsi-contrib.github.io/jitsi-helm"
-  chart      = "jitsi-helm"
+  chart      = "jitsi-meet"
   namespace  = kubernetes_namespace_v1.jitsi_namespace.metadata[0].name
   wait       = true
 

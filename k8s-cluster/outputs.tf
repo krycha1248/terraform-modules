@@ -10,7 +10,7 @@ output "kubernetes_host" {
   sensitive   = true
 }
 
-output "kubernetes_ca_certificate" {
+output "kubernetes_cluster_ca_certificate" {
   description = "Kubernetes API server CA certificate for the cluster"
   value       = ovh_cloud_project_kube.cluster.kubeconfig_attributes[0].cluster_ca_certificate
   sensitive   = true

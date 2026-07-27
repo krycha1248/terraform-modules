@@ -1154,11 +1154,11 @@ jibri:
   shm:
     # Set to true to enable "/dev/shm" mount.
     # May be required by built-in Chromium.
-    enabled: false
+    enabled: true
     # If "true", will use host's shared memory dir,
     # and if "false", an emptyDir mount.
-    #useHost: false
-    #size: 2Gi
+    useHost: false
+    size: 4Gi
 
   # Configure the update strategy for Jibri deployment.
   # This may be useful depending on your persistence settings,

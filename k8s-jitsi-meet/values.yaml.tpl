@@ -1146,7 +1146,7 @@ jibri:
   # emptyDir-backed storage instead.
   persistence:
     enabled: true
-    size: 4Gi
+    size: 32Gi
     # Set this to existing PVC name if you have one.
     #existingClaim:
     #storageClassName:
@@ -1157,8 +1157,8 @@ jibri:
     enabled: true
     # If "true", will use host's shared memory dir,
     # and if "false", an emptyDir mount.
-    useHost: false
-    size: 4Gi
+    #useHost: false
+    #size: 4Gi
 
   # Configure the update strategy for Jibri deployment.
   # This may be useful depending on your persistence settings,

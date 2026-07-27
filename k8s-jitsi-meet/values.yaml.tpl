@@ -1,0 +1,1189 @@
+# Default values for jitsi-meet.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  # Set your cluster's DNS domain here.
+  # "cluster.local" should work for most environments.
+  # Set to "" to disable the use of FQDNs (default in older chart versions).
+  clusterDomain: cluster.local
+  podLabels: {}
+  podAnnotations: {}
+  releaseSecretsOverride:
+    enabled: false
+    # Support environment variables from pre-created secrets, such as 1Password
+    # operator.
+    #extraEnvFrom:
+    #  - secretRef:
+    #      name: '{{ include "prosody.fullname" . }}-overrides'
+    #      optional: true
+
+nameOverride: ""
+fullnameOverride: ""
+tz: Europe/Warsaw
+
+imagePullSecrets: []
+image:
+  pullPolicy: IfNotPresent
+
+# Where Jitsi Web UI is made available
+# such as https://jitsi.example.com
+publicURL: ${domain}
+
+# Where TURN service is made available
+# such as turn.example.com
+turnHost: ""
+
+enableAuth: false
+enableGuests: true
+
+# WebSocket configuration:
+#
+# Both Colibri and XMPP WebSockets are disabled by default, since some
+# LoadBalancer / Reverse Proxy setups can't pass WebSocket connections properly,
+# which might result in breakage for some clients.
+#
+# Enable XMPP WebSocket and disable Colibri WebSocket to replicate the current
+# upstream `meet.jit.si` setup. SCTP is currently the preferred method for JVB
+# signaling.
+websockets:
+  # Colibri (JVB signalling)
+  colibri:
+    enabled: false
+  # XMPP (Prosody signalling)
+  xmpp:
+    enabled: false
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname
+  # template
+  name:
+
+xmpp:
+  domain: meet.jitsi
+  authDomain:
+  mucDomain:
+  internalMucDomain:
+  guestDomain:
+  hiddenDomain:
+
+extraCommonEnvs: {}
+
+## #############################################################################
+## Web configuration
+## #############################################################################
+web:
+  replicaCount: 1
+
+  image:
+    repository: jitsi/web
+    # If the tag is not set here then it is retrieved from Chart.yaml
+    #tag:
+
+  # Override the image-provided configuration files:
+  # See https://github.com/jitsi/docker-jitsi-meet/tree/master/web/rootfs
+  custom:
+    contInit:
+      _10_config: ""
+    defaults:
+      _default: ""
+      _ffdhe2048_txt: ""
+      _interface_config_js: ""
+      _meet_conf: ""
+      _nginx_conf: ""
+      _settings_config_js: ""
+      _ssl_conf: ""
+      _system_config_js: ""
+    configs:
+      _custom_interface_config_js: ""
+      _custom_config_js: ""
+
+  extraFiles: []
+  # - path: /config/nginx-custom/oidc.conf
+  #   content: |
+  #       location ~ /oidc/ {
+  #           proxy_pass http://127.0.0.1:9000;
+  #           proxy_http_version 1.1;
+  #           proxy_set_header X-Forwarded-For $remote_addr;
+  #           proxy_set_header Host $http_host;
+  #       }
+  # - path: /etc/cont-init.d/20-custom
+  #   mode: "0755"
+  #   content: |
+  #     #!/usr/bin/env bash
+  #     echo "Hello"
+
+  service:
+    type: ClusterIP
+    port: 80
+    # If you want to expose the Jitsi Web service directly
+    # (bypassing gateway or ingress), use this:
+    #type: NodePort
+    #nodePort: 30580
+    #port: 80
+    externalIPs: []
+    # Annotations to be added to the service (if LoadBalancer is used)
+    # An example below is needed for GKE IAP enablement
+    annotations: {}
+    #  beta.cloud.google.com/backend-config: backend-config-iap
+
+  gateway:
+    enabled: false
+    gatewayClassName: envoy-gateway-class
+    annotations: {}
+    host: "jitsi.local"
+    paths:
+      - "/"
+    tls:
+      enabled: false
+      secretName: jitsi-web-tls
+
+  ingress:
+    enabled: false
+    # ingressClassName: nginx-ingress-0
+    annotations: {}
+    #  kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: "jitsi.local"
+        paths:
+          - "/"
+    tls: []
+    #  - secretName: jitsi-web-tls
+    #    hosts:
+    #      - "jitsi.local"
+
+  # Useful for ingresses that don't support http-to-https redirect by themself,
+  # (namely: GKE),
+  httpRedirect: false
+
+  # When tls-termination by the ingress is not wanted, enable this and set
+  # web.service.type=Loadbalancer
+  httpsEnabled: false
+
+  # Resolver IP for nginx.
+  #
+  # Starting with version `stable-8044`, the web container can
+  # auto-detect the nameserver from /etc/resolv.conf.
+  # Use this option if you want to override the nameserver IP.
+  #resolverIP: 10.43.0.10
+
+  extraContainers: []
+  #  - name: jitsi-oidc-adapter
+  #    image: ghcr.io/jitsi-contrib/jitsi-oidc-adapter
+  #    imagePullPolicy: IfNotPresent
+  #    ports:
+  #      - name: http
+  #        containerPort: 9000
+  #    resources:
+  #      requests:
+  #        cpu: 50m
+  #        memory: 64Mi
+  #      limits:
+  #        cpu: 200m
+  #        memory: 256Mi
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 80
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 80
+
+  affinity: {}
+  annotations: {}
+  extraEnvs: {}
+  extraVolumes: []
+  extraVolumeMounts: []
+  hostAliases: []
+  labels: {}
+  nodeSelector: {}
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a
+  # conscious choice for the user. This also increases chances charts run on
+  # environments with little resources, such as Minikube. If you do want to
+  # specify resources, uncomment the following lines, adjust them as necessary,
+  # and remove the curly braces after 'resources:'
+  #  limits:
+  #    cpu: 100m
+  #    memory: 128Mi
+  #  requests:
+  #    cpu: 100m
+  #    memory: 128Mi
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  #  fsGroup: 2000
+  securityContext: {}
+  #  capabilities:
+  #    drop:
+  #    - ALL
+  #  readOnlyRootFilesystem: true
+  #  runAsNonRoot: true
+  #  runAsUser: 1000
+  tolerations: []
+
+## #############################################################################
+## Etherpad configuration
+## #############################################################################
+etherpad:
+  enabled: false
+
+  # Always one replica, hardcoded in etherpad/deployment.yaml
+  # replicaCount: 1
+
+  image:
+    repository: etherpad/etherpad
+    tag: 3.3.2
+
+  service:
+    port: 9001
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 9001
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 9001
+
+  affinity: {}
+  annotations: {}
+  extraEnvs:
+    NODE_ENV: production
+    ADMIN_PASSWORD: admin
+    # Select a supported database from here:
+    #   https://www.npmjs.com/package/ueberdb2
+    # By default, it uses Sqlite.
+    DB_TYPE: "sqlite"
+    DB_FILENAME: "var/etherpad.sq3"
+    # Configure other database parameters (e.g. for Postgres)
+    #DB_USER: etherpad
+    #DB_HOST: postgres
+    #DB_NAME: etherpad
+    #DB_PASS: etherpad
+    #DB_PORT: 5432
+    # For now, DEFAULT_PAD_TEXT cannot be unset or empty.
+    # It seems to be mandatory in the latest version of Etherpad.
+    DEFAULT_PAD_TEXT: " "
+    DISABLE_IP_LOGGING: "true"
+    TRUST_PROXY: "true"
+  extraFiles: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  labels: {}
+  nodeSelector: {}
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+  tolerations: []
+
+## #############################################################################
+## Excalidraw configuration
+## #############################################################################
+excalidraw:
+  # Enabling Excalidraw will allow the virtual whiteboard within meetings.
+  enabled: false
+
+  # Always one replica, hardcoded in excalidraw/deployment.yaml
+  # replicaCount: 1
+
+  image:
+    repository: jitsi/excalidraw-backend
+    tag: 2026.3.0
+
+  service:
+    port: 9002
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 9002
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 9002
+
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: true
+      selector:
+        release: prometheus-operator
+      interval: 10s
+      #honorLabels: false
+
+  affinity: {}
+  annotations: {}
+  extraEnvs: {}
+  extraFiles: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  labels: {}
+  nodeSelector: {}
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+  tolerations: []
+
+## #############################################################################
+## Coturn configuration
+## #############################################################################
+# STUN and TURN over UDP/3478. Media packages are still encrypted with DTLS-SRTP
+# Optional TURNS (TURN over TLS on TCP/443) support.
+coturn:
+  enabled: false
+
+  replicaCount: 1
+
+  image:
+    repository: coturn/coturn
+    tag: "4.14"
+
+  custom:
+    configs:
+      _turnserver_conf: ""
+
+  staticAuth:
+    secret:
+    # Alternatively provide a name for an externally managed secret containing
+    # the value for TURN_CREDENTIALS
+    existingSecretName:
+
+  turn:
+    transport: "udp"
+
+  # TURNS (TURN over TLS) configuration
+  # Relay ports use pod networking (internal cluster access only).
+  # - TCP/443 is exposed via LoadBalancer service for TURNS control connection
+  # - UDP relay ports remain internal on pod IP
+  # - JVB sends media to relay via internal pod-to-pod UDP
+  # - Requires coturn.allowedPeerIPs set to pod/node CIDR for relay to JVB
+  turns:
+    enabled: false
+    relayPortRange:
+      min: 50000
+      max: 54999
+    certificate:
+      # Create Certificate resource using cert-manager
+      create: true
+      # ClusterIssuer or Issuer to use
+      issuerRef:
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+        group: cert-manager.io
+      # Or use existing TLS secret (requires tls.crt and tls.key)
+      existingSecretName: ""
+
+      # ACME challenge proxy - enables certificate validation when
+      # TURN runs on separate IP from ingress controller
+      # This will proxy ACME challenges to the specified ingress
+      # Requires Kubernetes native sidecar containers support
+      acmeProxy:
+        enabled: false
+        # Internal cluster address of ingress controller
+        # Defaults to traefik service in "traefik" namespace
+        target: traefik.traefik.svc.cluster.local
+        targetPort: 80
+
+  service:
+    type: LoadBalancer
+    # NodePort allocation when using LoadBalancer service
+    allocateLoadBalancerNodePorts: true
+    ports:
+      turn: 3478
+      turns: 443
+    # Optional: Specifies the LoadBalancer controller to use (since K8s v1.24).
+    # If left empty (null), the default cluster controller will be used.
+    # Example values: "service.k8s.aws/nlb", "loxilb.io/loxilb"
+    #loadBalancerClass: null
+    # Annotations to be added to the service (if LoadBalancer is used)
+    annotations: {}
+
+  # The JVB's public IP addresses are expected to be directly accessible by
+  # Coturn in the production environment.
+  # allowedPeerIPs is required when Coturn cannot directly access JVBs through
+  # their public IPs. In this case, set to your cluster's node/pod range to
+  # allow coturn to relay to JVB
+  allowedPeerIPs: []
+  #allowedPeerIPs:
+  #  - "10.244.0.0-10.244.255.255"
+  #  - "100.64.0.0-100.127.255.255"
+
+  livenessProbe:
+    tcpSocket:
+      port: 3478
+
+  readinessProbe:
+    tcpSocket:
+      port: 3478
+
+  initContainers:
+    busybox:
+      image: busybox:1.38.0
+      securityContext: {}
+    acmeProxy:
+      image: nginx:alpine
+      securityContext: {}
+
+  # Native Prometheus metrics for Coturn (port 9641)
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: true
+      selector:
+        release: prometheus-operator
+      interval: 10s
+      # honorLabels: false
+
+  affinity: {}
+  annotations: {}
+  extraEnvs: {}
+  extraFiles: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  labels: {}
+  nodeSelector: {}
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+  tolerations: []
+
+## #############################################################################
+## Prosody configuration
+## #############################################################################
+prosody:
+  # Always one replica, hardcoded in prosody/statefulset.yaml
+  # replicaCount: 1
+
+  image:
+    repository: jitsi/prosody
+    # If the tag is not set here then it is retrieved from Chart.yaml
+    #tag:
+
+  # Override the image-provided configuration files:
+  # See https://github.com/jitsi/docker-jitsi-meet/tree/master/prosody/rootfs
+  custom:
+    contInit:
+      _10_config: ""
+    defaults:
+      _prosody_cfg_lua: ""
+      _saslauthd_conf: ""
+      _jitsi_meet_cfg_lua: ""
+
+  # JWT secret.
+  # Required only if authentication type is "token" or "hybrid_matrix_token"
+  jwt:
+    secret:
+    # Alternatively provide a name for an externally managed secret containing
+    # the values for JWT_APP_SECRET
+    existingSecretName:
+
+  service:
+    type: ClusterIP
+    ports:
+      bosh-insecure: 5280
+      bosh-secure: 5281
+      xmpp-c2s: 5222
+      xmpp-s2s: 5269
+      xmpp-component: 5347
+
+  livenessProbe:
+    httpGet:
+      path: /http-bind
+      port: bosh-insecure
+
+  readinessProbe:
+    httpGet:
+      path: /http-bind
+      port: bosh-insecure
+
+  dataDir: /config/data
+
+  # Persistence is needed if user accounts are stored in Prosody.
+  # e.g. internal_hashed as authentication
+  persistence:
+    enabled: false
+    size: 3G
+    storageClassName:
+
+  extraVolumes: []
+  #  - name: prosody-modules
+  #    configMap:
+  #      name: prosody-modules
+
+  extraVolumeMounts: []
+  #  - name: prosody-modules
+  #    subPath: mod_measure_client_presence.lua
+  #    mountPath: /prosody-plugins-custom/mod_measure_client_presence.lua
+
+  extraSecrets: []
+  #  - name: "JWT_APP_SECRET"
+  #    valueFrom:
+  #      secretKeyRef:
+  #        name: "my-application-secrets"
+  #        key: "JITSI_JWT_SECRET"
+
+  extraEnvFrom: []
+  #  - secretRef:
+  #      name: "my-application-secrets"
+  #  - configMapRef:
+  #      name: "my-application-configmap"
+
+  metrics:
+    enabled: false
+    allowed_cidr: "0.0.0.0/0" # change to cluster pod ip cidr
+    image:
+      repository: otel/opentelemetry-collector-contrib
+      tag: "0.76.1"
+      pullPolicy: IfNotPresent
+    serviceMonitor:
+      enabled: true
+      selector:
+        release: prometheus-operator
+      interval: 10s
+      #honorLabels: false
+    securityContext: {}
+    #  allowPrivilegeEscalation: false
+    #  capabilities:
+    #    drop:
+    #      - ALL
+    #  readOnlyRootFilesystem: true
+    #  runAsNonRoot: true
+    #  runAsUser: 1000
+    #  seccompProfile:
+    #    type: RuntimeDefault
+
+  affinity: {}
+  annotations: {}
+  extraEnvs: {}
+  extraFiles: []
+  hostAliases: []
+  labels: {}
+  nodeSelector: {}
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+  tolerations: []
+
+## #############################################################################
+## Jicofo configuration
+## #############################################################################
+jicofo:
+  # Always one replica, hardcoded in jicofo/deployment.yaml
+  # replicaCount: 1
+
+  image:
+    repository: jitsi/jicofo
+    # If the tag is not set here then it is retrieved from Chart.yaml
+    #tag:
+
+  # Override the image-provided configuration files:
+  # See https://github.com/jitsi/docker-jitsi-meet/tree/master/jicofo/rootfs
+  custom:
+    contInit:
+      _10_config: ""
+    defaults:
+      _jicofo_conf: ""
+      _logging_properties: ""
+
+  # Jicofo XMPP user credentials
+  xmpp:
+    password:
+    # Alternatively provide a name for an externally managed secret containing
+    # the values for JICOFO_AUTH_PASSWORD
+    existingSecretName:
+
+  livenessProbe:
+    tcpSocket:
+      port: 8888
+
+  readinessProbe:
+    tcpSocket:
+      port: 8888
+
+  metrics:
+    enabled: false
+    image:
+      repository: prayagsingh/prometheus-jicofo-exporter
+      tag: "1.3.2"
+    resources: {}
+    securityContext: {}
+
+  affinity: {}
+  annotations: {}
+  extraEnvs: {}
+  extraFiles: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  labels: {}
+  nodeSelector: {}
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+  tolerations: []
+
+## #############################################################################
+## JVB configuration
+## #############################################################################
+jvb:
+  replicaCount: 1
+
+  image:
+    repository: jitsi/jvb
+    # If the tag is not set here then it is retrieved from Chart.yaml
+    #tag:
+
+  breweryMuc: jvbbrewery
+
+  # JVB XMPP user credentials
+  xmpp:
+    user: jvb
+    password:
+    # Alternatively provide a name for an externally managed secret containing
+    # the values for JVB_AUTH_USER, JVB_AUTH_PASSWORD
+    existingSecretName:
+
+  # Set public IP addresses to be advertised by JVB.
+  # You can specify your nodes' IP addresses,
+  # or IP addresses of proxies/LoadBalancers used for your
+  # Jitsi Meet installation. Or both!
+  #
+  publicIPs:
+    - ${ingress_ip}
+  #  - 5.6.7.8
+  # Alternative option: auto-detect Node's external IP address.
+  # Recommended for OCTO setups (with either NodePort service
+  # or hostPort enabled) where every JVB pod should announce it's
+  # own IP address only.
+  useNodeIP: false
+
+  # STUN lets JVB discover its own public (server-reflexive) IP so it can
+  # advertise a reachable address to clients. The STUN server must be reachable
+  # over a public path: querying an in-cluster address would only report JVB's
+  # internal IP and defeat the purpose.
+  #
+  # Precedence (first match wins):
+  #   1. disableStun: true          STUN disabled
+  #   2. useInternalStun (+ coturn) chart's coturn STUN, via the public turnHost
+  #   3. stunServers (non-empty)    that external STUN server
+  #   4. otherwise                  STUN disabled
+
+  # External STUN server used to find JVB's external IP.
+  stunServers: "meet-jit-si-turnrelay.jitsi.net:443"
+  # Use the coturn STUN deployed by this chart instead of stunServers. Despite
+  # the name, this targets the PUBLIC turnHost (not an internal ClusterIP),
+  # because STUN must observe JVB from outside. Requires coturn.enabled and
+  # turnHost.
+  useInternalStun: false
+  # Explicitly disable STUN, overriding useInternalStun and stunServers. Use
+  # this when publicIPs (or useNodeIP) is set explicitly and JVB does not need
+  # STUN to discover its IP.
+  disableStun: false
+
+  # Try to use the hostPort feature:
+  # (might not be supported by some clouds or CNI engines)
+  useHostPort: false
+  # Use host's network namespace:
+  # (not recommended, but might help for some cases)
+  useHostNetwork: false
+  # UDP transport port:
+  UDPPort: 10000
+  # Number of consecutive ports to allocate.
+  # If set to 1, only UDPPort is used (legacy behavior).
+  # If > 1, UDPPort acts as the base for the port range.
+  # This range logic is only valid if useHostPort is enabled.
+  portRangeSize: 1
+  # Use a pre-defined external port for NodePort or LoadBalancer service,
+  # if needed. Will allocate a random port from allowed range if unset.
+  # (Default NodePort range for K8s is 30000-32767)
+  #nodePort: 10000
+
+  service:
+    # When the service is enabled, JVB's replicaCount and portRangeSize must be
+    # 1. This means that there can only be one JVB in this case.
+    enabled: true
+    type: ClusterIP
+    externalTrafficPolicy: Cluster
+    externalIPs: []
+    # Optional: Specifies the LoadBalancer controller to use (since K8s v1.24).
+    # If left empty (null), the default cluster controller will be used.
+    # Example values: "service.k8s.aws/nlb", "loxilb.io/loxilb"
+    #loadBalancerClass: null
+    # If type is set to LoadBalancer and the cluster is dual stack,
+    # ipFamilyPolicy can be set to enable dual stack addressing for the service
+    #ipFamilyPolicy: PreferDualStack
+    # Annotations to be added to the service (if LoadBalancer is used)
+    # An example below is needed for DigitalOcean managed k8s setups
+    # with a LoadBalancer service, so that DO's external LB can perform
+    # health checks on JVB.
+    annotations: {}
+    #  service.beta.kubernetes.io/do-loadbalancer-healthcheck-port: "8080"
+    #  service.beta.kubernetes.io/do-loadbalancer-healthcheck-protocol: "tcp"
+    # Add extra ports to the service.
+    # An example below is needed for DigitalOcean managed k8s setups.
+    extraPorts: []
+    #  - name: http-healthcheck
+    #    port: 8080
+    #    protocol: TCP
+
+  livenessProbe:
+    httpGet:
+      path: /about/health
+      port: 8080
+
+  readinessProbe:
+    httpGet:
+      path: /about/health
+      port: 8080
+
+  metrics:
+    enabled: false
+    image:
+      repository: docker.io/systemli/prometheus-jitsi-meet-exporter
+      tag: 1.4.2
+      pullPolicy: IfNotPresent
+    securityContext:
+      runAsUser: 10001
+
+    resources:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits:
+        cpu: 20m
+        memory: 32Mi
+
+    prometheusAnnotations: false
+    serviceMonitor:
+      enabled: true
+      selector:
+        release: prometheus-operator
+      interval: 10s
+      # honorLabels: false
+
+    grafanaDashboards:
+      enabled: false
+      labels:
+        grafana_dashboard: "1"
+      annotations: {}
+
+  affinity: {}
+  annotations: {}
+  extraEnvs: {}
+  extraFiles: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  labels: {}
+  nodeSelector: {}
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+  tolerations: []
+
+octo:
+  enabled: false
+
+## #############################################################################
+## Jigasi configuration
+## #############################################################################
+jigasi:
+  # Enabling Jigasi will allow regular SIP clients to join Jitsi meetings
+  enabled: false
+
+  # Use external Jigasi installation.
+  # This setting skips the creation of Jigasi Deployment altogether,
+  # instead creating just the config secret and enabling services.
+  # Defaults to disabled (use bundled Jigasi).
+  useExternalJigasi: false
+
+  # Always one replica, hardcoded in jigasi/deployment.yaml
+  # replicaCount: 1
+
+  image:
+    repository: jitsi/jigasi
+    # If the tag is not set here then it is retrieved from Chart.yaml
+    #tag:
+
+  breweryMuc: jigasibrewery
+
+  # Jigasi XMPP user credentials
+  xmpp:
+    user: jigasi
+    password:
+    # Alternatively provide a name for an externally managed secret containing
+    # the values for JIGASI_XMPP_USER and JIGASI_XMPP_PASSWORD
+    existingSecretName:
+
+  livenessProbe:
+    httpGet:
+      path: /about/health
+      port: 8788
+      httpHeaders:
+        - name: Accept
+          value: application/json
+
+  readinessProbe:
+    httpGet:
+      path: /about/health
+      port: 8788
+      httpHeaders:
+        - name: Accept
+          value: application/json
+
+  initContainers:
+    busybox:
+      image: busybox:1.38.0
+      securityContext: {}
+
+  affinity: {}
+  annotations: {}
+  extraEnvFrom: []
+  extraEnvs: {}
+  extraFiles: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  hostAliases: []
+  labels: {}
+  nodeSelector: {}
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+  tolerations: []
+
+## #############################################################################
+## Transcriber configuration
+## #############################################################################
+transcriber:
+  # Enabling Transcriber will allow nearly real-time transcription.
+  enabled: false
+
+  # Use external Transcriber installation.
+  # This setting skips the creation of Transcriber Deployment altogether,
+  # instead creating just the config secret and enabling services.
+  # Defaults to disabled (use bundled Trabsciber).
+  useExternalTranscriber: false
+
+  # Always one replica, hardcoded in transcriber/deployment.yaml
+  # replicaCount: 1
+
+  image:
+    repository: jitsi/jigasi
+    # If the tag is not set here then it is retrieved from Chart.yaml
+    #tag:
+
+  # Transcriber XMPP user credentials
+  # Transcriber also requires credentials for Jigasi, even its pod is disabled.
+  xmpp:
+    user: transcriber
+    password:
+    # Alternatively provide a name for an externally managed secret containing
+    # the values for JIGASI_TRANSCRIBER_USER and JIGASI_TRANSCRIBER_PASSWORD
+    existingSecretName:
+
+  livenessProbe:
+    httpGet:
+      path: /about/health
+      port: 8788
+      httpHeaders:
+        - name: Accept
+          value: application/json
+
+  readinessProbe:
+    httpGet:
+      path: /about/health
+      port: 8788
+      httpHeaders:
+        - name: Accept
+          value: application/json
+
+  persistence:
+    enabled: false
+    #storageClass: ""
+    #size: 10Gi
+    #existingClaim: ""
+
+  whisper:
+    customService: ""
+    url: ""
+
+  initContainers:
+    busybox:
+      image: busybox:1.38.0
+      securityContext: {}
+
+  affinity: {}
+  annotations: {}
+  extraEnvFrom: []
+  extraEnvs: {}
+  extraFiles: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  hostAliases: []
+  labels: {}
+  nodeSelector: {}
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+  tolerations: []
+
+## #############################################################################
+## Skynet configuration
+## #############################################################################
+skynet:
+  # Skynet provides the streaming Whisper backend used by the Transcriber for
+  # near real-time transcription. When enabled, the Transcriber is
+  # automatically pointed at it (see the transcriber.whisper section), unless
+  # you set transcriber.whisper.url explicitly.
+  #
+  # NOTE: only the streaming_whisper module is enabled here, which does NOT
+  # require Redis. The summaries/assistant modules (which do need Redis) are
+  # out of scope for this chart.
+  enabled: false
+
+  # Use an external Skynet installation instead of the bundled one.
+  # When true, no Skynet resources are created and the Transcriber is wired
+  # to the websocket URL below.
+  useExternalSkynet: false
+
+  # Base websocket URL of the external Skynet streaming-whisper endpoint.
+  # Only used when useExternalSkynet is true. Do NOT include a trailing
+  # connection id or query string; jigasi appends the connection id itself.
+  # e.g. wss://skynet.example.com/streaming-whisper/ws
+  url: ""
+
+  # Always one replica, hardcoded in skynet/deployment.yaml
+  # replicaCount: 1
+
+  image:
+    repository: jitsi/skynet
+    # Skynet is released independently from Jitsi, so the tag is pinned here
+    # rather than derived from Chart.AppVersion. Only CPU images (the "-cpu"
+    # tag) are published, so the bundled Skynet runs on CPU.
+    tag: latest-cpu
+
+  service:
+    port: 8000
+
+  whisper:
+    # Whisper model name, pulled from HuggingFace at runtime. Defaults to the
+    # multilingual "small" model. Bigger models (medium, large-v3) are more
+    # accurate but slower on CPU and larger to download.
+    model: small
+
+  # Persist the downloaded Whisper model across pod restarts/rescheduling.
+  # Off by default: the model is cached in an emptyDir, which already survives
+  # container restarts within a pod. Enable this for large models to avoid
+  # re-downloading the model on every pod recreation.
+  persistence:
+    enabled: false
+    #storageClass: ""
+    #size: 10Gi
+    #existingClaim: ""
+
+  # No liveness probe by default: Skynet downloads the model on first start,
+  # and a failing liveness probe would restart the container mid-download in a
+  # loop. The readiness probe (tcpSocket) simply keeps the pod out of the
+  # Service until the port is listening. Set a livenessProbe/startupProbe here
+  # if you want one.
+  livenessProbe: {}
+  readinessProbe:
+    tcpSocket:
+      port: 8000
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+  affinity: {}
+  annotations: {}
+  extraEnvFrom: []
+  extraEnvs: {}
+  extraFiles: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  hostAliases: []
+  labels: {}
+  nodeSelector: {}
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+  tolerations: []
+
+## #############################################################################
+## Jibri configuration
+## #############################################################################
+jibri:
+  # Enabling Jibri will allow users to record
+  # and/or stream their meetings (e.g. to YouTube).
+  enabled: true
+
+  # Use external Jibri installation.
+  # This setting skips the creation of Jibri Deployment altogether,
+  # instead creating just the config secret
+  # and enabling recording/streaming services.
+  # Defaults to disabled (use bundled Jibri).
+  useExternalJibri: false
+
+  # Enable multiple Jibri instances.
+  # If enabled (i.e. set to 2 or more), each Jibri instance
+  # will get an ID assigned to it, based on pod name.
+  # Multiple replicas are recommended for single-use mode.
+  replicaCount: 1
+
+  image:
+    repository: jitsi/jibri
+    # If the tag is not set here then it is retrieved from Chart.yaml
+    #tag:
+
+  # Override the image-provided configuration files:
+  # See https://github.com/jitsi/docker-jitsi-meet/tree/master/jibri/rootfs
+  custom:
+    contInit:
+      _10_config: ""
+    defaults:
+      _autoscaler_sidecar_config: ""
+      _jibri_conf: ""
+      _logging_properties: ""
+      _xorg_video_dummy_conf: ""
+    other:
+      _finalize_sh: ""
+
+  breweryMuc: jibribrewery
+  timeout: 90
+
+  # Jibri XMPP user credentials
+  xmpp:
+    user: jibri
+    password:
+    # Alternatively provide a name for an externally managed secret containing
+    # the values for JIBRI_XMPP_USER and JIBRI_XMPP_PASSWORD
+    existingSecretName:
+
+  # Recorder XMPP user credentials
+  recorder:
+    user: recorder
+    password:
+    # Alternatively provide a name for an externally managed secret containing
+    # the values for JIBRI_RECORDER_USER and JIBRI_RECORDER_PASSWORD
+    existingSecretName:
+
+  livenessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 3
+    exec:
+      command:
+        - /bin/bash
+        - "-c"
+        - >-
+            curl -sq localhost:2222/jibri/api/v1.0/health
+            | jq '"\(.status.health.healthStatus) \(.status.busyStatus)"'
+            | grep -qP 'HEALTHY (IDLE|BUSY)'
+
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 3
+    exec:
+      command:
+        - /bin/bash
+        - "-c"
+        - >-
+            curl -sq localhost:2222/jibri/api/v1.0/health
+            | jq '"\(.status.health.healthStatus) \(.status.busyStatus)"'
+            | grep -qP 'HEALTHY (IDLE|BUSY)'
+
+  # Enable single-use mode for Jibri.
+  # With this setting enabled, every Jibri instance
+  # will become "expired" after being used once (successfully or not)
+  # and cleaned up (restarted) by Kubernetes.
+  #
+  # Note that detecting expired Jibri, restarting and registering it
+  # takes some time, so you'll have to make sure you have enough
+  # instances at your disposal.
+  # You might also want to make LivenessProbe fail faster.
+  singleUseMode: false
+
+  # Enable recording service.
+  # Set this to true/false to enable/disable local recordings.
+  # Defaults to enabled (allow local recordings).
+  recording: true
+
+  # Enable livestreaming service.
+  # Set this to true/false to enable/disable live streams.
+  # Defaults to disabled (livestreaming is forbidden).
+  livestreaming: false
+
+  # Enable persistent storage for local recordings.
+  # If disabled, jibri pod will use a transient
+  # emptyDir-backed storage instead.
+  persistence:
+    enabled: true
+    size: 4Gi
+    # Set this to existing PVC name if you have one.
+    #existingClaim:
+    #storageClassName:
+
+  shm:
+    # Set to true to enable "/dev/shm" mount.
+    # May be required by built-in Chromium.
+    enabled: false
+    # If "true", will use host's shared memory dir,
+    # and if "false", an emptyDir mount.
+    #useHost: false
+    #size: 2Gi
+
+  # Configure the update strategy for Jibri deployment.
+  # This may be useful depending on your persistence settings,
+  # e.g. when you use ReadWriteOnce PVCs.
+  # Default strategy is "RollingUpdate", which keeps
+  # the old instances up until the new ones are ready.
+  #strategy:
+  #  type: RollingUpdate
+
+  affinity: {}
+  annotations: {}
+  extraEnvs: {}
+  extraFiles: []
+  extraSecrets: []
+  extraSecretsFrom: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  hostAliases: []
+  labels: {}
+  nodeSelector: {}
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext:
+    capabilities:
+      add: ["SYS_ADMIN"]
+  tolerations: []

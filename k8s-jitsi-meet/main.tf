@@ -13,3 +13,19 @@ resource "kubernetes_manifest" "certissuer" {
     ingress_class_name              = var.ingress_class_name
   }))
 }
+
+resource "helm_release" "jitsi" {
+  depends_on = [
+    kubernetes_manifest.certissuer
+  ]
+  name       = "jitsi"
+  repository = "https://jitsi-contrib.github.io/jitsi-helm/"
+  chart      = "jitsi"
+  namespace  = kubernetes_namespace_v1.jitsi_namespace.metadata[0].name
+  wait       = true
+
+  values = [templatefile("${path.module}/values.yaml.tpl", {
+    domain     = var.domain
+    ingress_ip = var.ingress_ip
+  })]
+}

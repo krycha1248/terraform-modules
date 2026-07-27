@@ -45,3 +45,15 @@ variable "ingress_class_name" {
   type        = string
   default     = "traefik"
 }
+
+variable "domain" {
+  description = "Domain name for the Jitsi deployment."
+  type        = string
+  nullable    = false
+}
+
+variable "ingress_ip" {
+  description = "Ingress IP address for the Jitsi deployment."
+  type        = string
+  nullable    = false
+}

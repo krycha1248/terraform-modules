@@ -34,7 +34,7 @@ publicURL: ${domain}
 # such as turn.example.com
 turnHost: ""
 
-enableAuth: true
+enableAuth: false
 enableGuests: true
 
 # WebSocket configuration:

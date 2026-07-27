@@ -19,8 +19,8 @@ resource "helm_release" "jitsi" {
     kubernetes_manifest.certissuer
   ]
   name       = "jitsi"
-  repository = "https://jitsi-contrib.github.io/jitsi-helm/"
-  chart      = "jitsi"
+  repository = "https://jitsi-contrib.github.io/"
+  chart      = "jitsi-helm"
   namespace  = kubernetes_namespace_v1.jitsi_namespace.metadata[0].name
   wait       = true
 

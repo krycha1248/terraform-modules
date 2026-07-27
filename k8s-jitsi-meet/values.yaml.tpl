@@ -144,18 +144,18 @@ web:
       secretName: jitsi-web-tls
 
   ingress:
-    enabled: false
-    # ingressClassName: nginx-ingress-0
+    enabled: true
+    ingressClassName: traefik
     annotations: {}
     #  kubernetes.io/tls-acme: "true"
     hosts:
-      - host: "jitsi.local"
+      - host: ${domain}
         paths:
           - "/"
-    tls: []
-    #  - secretName: jitsi-web-tls
-    #    hosts:
-    #      - "jitsi.local"
+    tls:
+      - secretName: jitsi-web-tls
+        hosts:
+          - ${domain}
 
   # Useful for ingresses that don't support http-to-https redirect by themself,
   # (namely: GKE),
@@ -1042,7 +1042,7 @@ skynet:
 jibri:
   # Enabling Jibri will allow users to record
   # and/or stream their meetings (e.g. to YouTube).
-  enabled: true
+  enabled: false
 
   # Use external Jibri installation.
   # This setting skips the creation of Jibri Deployment altogether,

@@ -39,10 +39,10 @@ resource "helm_release" "traefik" {
 }
 
 data "kubernetes_service_v1" "traefik" {
-  count = helm_release.traefik.status == "deployed" ? 1 : 0
+  count = helm_release.traefik[0].status == "deployed" ? 1 : 0
   metadata {
     name      = "traefik"
-    namespace = helm_release.traefik.namespace
+    namespace = helm_release.traefik[0].namespace
   }
 }
 

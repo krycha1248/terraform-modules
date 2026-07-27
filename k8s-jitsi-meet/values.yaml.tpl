@@ -34,7 +34,7 @@ publicURL: ${domain}
 # such as turn.example.com
 turnHost: ""
 
-enableAuth: false
+enableAuth: true
 enableGuests: true
 
 # WebSocket configuration:
@@ -66,7 +66,7 @@ serviceAccount:
 
 xmpp:
   domain: meet.jitsi
-  authDomain:
+  authDomain: auth.meet.jitsi
   mucDomain:
   internalMucDomain:
   guestDomain:
@@ -519,9 +519,9 @@ prosody:
   # Persistence is needed if user accounts are stored in Prosody.
   # e.g. internal_hashed as authentication
   persistence:
-    enabled: false
+    enabled: true
     size: 3G
-    storageClassName:
+    #storageClassName:
 
   extraVolumes: []
   #  - name: prosody-modules
@@ -1042,7 +1042,7 @@ skynet:
 jibri:
   # Enabling Jibri will allow users to record
   # and/or stream their meetings (e.g. to YouTube).
-  enabled: false
+  enabled: true
 
   # Use external Jibri installation.
   # This setting skips the creation of Jibri Deployment altogether,
@@ -1157,8 +1157,8 @@ jibri:
     enabled: true
     # If "true", will use host's shared memory dir,
     # and if "false", an emptyDir mount.
-    #useHost: false
-    #size: 4Gi
+    useHost: false
+    size: 2Gi
 
   # Configure the update strategy for Jibri deployment.
   # This may be useful depending on your persistence settings,

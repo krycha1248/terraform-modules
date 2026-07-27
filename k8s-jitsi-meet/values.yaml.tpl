@@ -1157,7 +1157,7 @@ jibri:
     enabled: true
     # If "true", will use host's shared memory dir,
     # and if "false", an emptyDir mount.
-    useHost: false
+    useHost: true
     size: 4Gi
 
   # Configure the update strategy for Jibri deployment.

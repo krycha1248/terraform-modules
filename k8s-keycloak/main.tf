@@ -1,6 +1,6 @@
-resource "kubernetes_namespace_v1" "jitsi_namespace" {
+data "kubernetes_namespace_v1" "keycloak_namespace" {
   metadata {
-    name = "jitsi"
+    name = var.namespace
   }
 }
 
@@ -10,7 +10,7 @@ resource "kubernetes_manifest" "issuer" {
     kind       = "Issuer"
     metadata = {
       name      = var.cluster_issuer_name
-      namespace = kubernetes_namespace_v1.jitsi_namespace.metadata[0].name
+      namespace = data.kubernetes_namespace_v1.keycloak_namespace.metadata[0].name
     }
     spec = {
       acme = {
@@ -33,18 +33,15 @@ resource "kubernetes_manifest" "issuer" {
   }
 }
 
-resource "helm_release" "jitsi" {
-  depends_on = [
-    kubernetes_manifest.certissuer
-  ]
-  name       = "jitsi"
-  repository = "https://jitsi-contrib.github.io/jitsi-helm"
-  chart      = "jitsi-meet"
-  namespace  = kubernetes_namespace_v1.jitsi_namespace.metadata[0].name
+resource "helm_release" "keycloak" {
+  name       = "keycloak"
+  repository = "oci://ghcr.io/codecentric/helm-charts"
+  chart      = "keycloakx"
+  namespace  = data.kubernetes_namespace_v1.keycloak_namespace.metadata[0].name
   wait       = true
-
   values = [templatefile("${path.module}/values.yaml.tpl", {
-    domain     = var.domain
-    ingress_ip = var.ingress_ip
+    domain_name        = var.domain_name
+    db_hostname        = var.db_hostname
+    ingress_class_name = var.ingress_class_name
   })]
 }

@@ -1,10 +1,16 @@
+resource "kubernetes_namespace_v1" "namespace" {
+  metadata {
+    name = var.namespace
+  }
+}
+
 resource "kubernetes_manifest" "cnpg_operator" {
   manifest = {
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "Cluster"
     metadata = {
       name      = var.cluster_name
-      namespace = var.namespace
+      namespace = kubernetes_namespace_v1.namespace.metadata[0].name
     }
 
     spec = {

@@ -68,3 +68,24 @@ resource "helm_release" "cert_manager" {
     }
   ]
 }
+
+resource "helm_release" "cloudnativepg" {
+  depends_on       = [helm_release.cert_manager]
+  count            = var.deploy_cnpg ? 1 : 0
+  name             = "cloudnativepg"
+  repository       = "https://cloudnative-pg.github.io/charts"
+  chart            = "cloudnative-pg"
+  namespace        = "cloudnative-pg"
+  create_namespace = true
+  wait             = true
+  timeout          = 600
+}
+
+resource "helm_release" "cnpg_plugin_barman_cloud" {
+  count            = var.deploy_cnpg ? 1 : 0
+  name             = "plugin-barman-cloud"
+  namespace        = helm_release.cloudnativepg.namespace
+  create_namespace = false
+  repository       = "https://cloudnative-pg.github.io/charts"
+  chart            = "plugin-barman-cloud"
+}

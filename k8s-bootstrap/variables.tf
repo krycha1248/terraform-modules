@@ -27,3 +27,9 @@ variable "deploy_traefik" {
   type        = bool
   default     = false
 }
+
+variable "deploy_cnpg" {
+  description = "Flag to determine whether to deploy CloudNativePG."
+  type        = bool
+  default     = false
+}

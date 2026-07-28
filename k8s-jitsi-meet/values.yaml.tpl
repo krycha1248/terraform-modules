@@ -1042,7 +1042,7 @@ skynet:
 jibri:
   # Enabling Jibri will allow users to record
   # and/or stream their meetings (e.g. to YouTube).
-  enabled: true
+  enabled: false
 
   # Use external Jibri installation.
   # This setting skips the creation of Jibri Deployment altogether,

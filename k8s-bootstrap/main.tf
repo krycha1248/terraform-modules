@@ -84,7 +84,7 @@ resource "helm_release" "cloudnativepg" {
 resource "helm_release" "cnpg_plugin_barman_cloud" {
   count            = var.deploy_cnpg ? 1 : 0
   name             = "plugin-barman-cloud"
-  namespace        = helm_release.cloudnativepg.namespace
+  namespace        = helm_release.cloudnativepg[0].namespace
   create_namespace = false
   repository       = "https://cloudnative-pg.github.io/charts"
   chart            = "plugin-barman-cloud"

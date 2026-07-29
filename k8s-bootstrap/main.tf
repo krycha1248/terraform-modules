@@ -13,6 +13,10 @@ resource "helm_release" "traefik" {
       service = {
         type = "LoadBalancer"
 
+        annotations = {
+          "service.beta.kubernetes.io/ovh-loadbalancer-proxy-protocol" = "v2"
+        }
+
         spec = {
           externalTrafficPolicy = "Local"
         }
@@ -20,13 +24,19 @@ resource "helm_release" "traefik" {
 
       ports = {
         web = {
-          allowACMEByPass = true
+          proxyProtocol = {
+            trustedIPs = [
+              "0.0.0.0/0"
+            ]
+          }
 
           forwardedHeaders = {
             trustedIPs = [
               "0.0.0.0/0"
             ]
           }
+
+          allowACMEByPass = true
 
           http = {
             redirections = {
@@ -40,6 +50,12 @@ resource "helm_release" "traefik" {
         }
 
         websecure = {
+          proxyProtocol = {
+            trustedIPs = [
+              "0.0.0.0/0"
+            ]
+          }
+
           forwardedHeaders = {
             trustedIPs = [
               "0.0.0.0/0"

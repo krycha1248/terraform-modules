@@ -16,8 +16,7 @@ resource "helm_release" "traefik" {
         externalTrafficPolicy = "Local"
 
         annotations = {
-          "service.beta.kubernetes.io/ovh-loadbalancer-proxy-protocol" = "v2"
-          "loadbalancer.openstack.org/proxy-protocol"                  = "v2"
+          "loadbalancer.openstack.org/proxy-protocol" = "v2"
         }
       }
 

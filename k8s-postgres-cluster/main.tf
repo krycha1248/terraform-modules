@@ -42,38 +42,47 @@ locals {
         }
       }
     }
-  } : {}
+  } : {
+    backup = null
+  }
 
-  restore_spec = var.mode == "restore" && var.backup != null ? {
-    bootstrap = {
-      recovery = {
-        source = "${var.cluster_name}-backup-source"
+  restore_spec = merge(
+    {
+      bootstrap = null
+      externalClusters = null
+    },
+
+    var.mode == "restore" && var.backup != null ? {
+      bootstrap = {
+        recovery = {
+          source = "${var.cluster_name}-backup-source"
+        }
       }
-    }
 
-    externalClusters = [
-      {
-        name = "${var.cluster_name}-backup-source"
+      externalClusters = [
+        {
+          name = "${var.cluster_name}-backup-source"
 
-        barmanObjectStore = {
-          destinationPath = "s3://${var.backup.bucket}/${var.backup.path}"
-          endpointURL     = var.backup.endpoint
+          barmanObjectStore = {
+            destinationPath = "s3://${var.backup.bucket}/${var.backup.path}"
+            endpointURL     = var.backup.endpoint
 
-          s3Credentials = {
-            accessKeyId = {
-              name = kubernetes_secret_v1.backup[0].metadata[0].name
-              key  = "ACCESS_KEY_ID"
-            }
+            s3Credentials = {
+              accessKeyId = {
+                name = kubernetes_secret_v1.backup[0].metadata[0].name
+                key  = "ACCESS_KEY_ID"
+              }
 
-            secretAccessKey = {
-              name = kubernetes_secret_v1.backup[0].metadata[0].name
-              key  = "ACCESS_SECRET_KEY"
+              secretAccessKey = {
+                name = kubernetes_secret_v1.backup[0].metadata[0].name
+                key  = "ACCESS_SECRET_KEY"
+              }
             }
           }
         }
-      }
-    ]
-  } : {}
+      ]
+    } : {}
+  )
 
   cluster_spec = merge(
     local.base_spec,

@@ -125,14 +125,10 @@ extraEnv: |
     value: ${domain_name}
   - name: KC_HOSTNAME_STRICT
     value: "true"
-  - name: KC_PROXY_HEADERS
-    value: "xforwarded"
   - name: KC_BOOTSTRAP_ADMIN_USERNAME
     value: "admin"
   - name: KC_BOOTSTRAP_ADMIN_PASSWORD
     value: "admin"
-  - name: KC_HTTP_RELATIVE_PATH
-    value: "/auth"
 
 # Additional environment variables for Keycloak
 #extraEnv: ""
@@ -395,7 +391,8 @@ ingress:
   # The Service port targeted by the Ingress
   servicePort: http
   # Ingress annotations
-  annotations: {}
+  annotations: 
+    cert-manager.io/issuer: letsencrypt-prod
     ## Resolve HTTP 502 error using ingress-nginx:
     ## See https://www.ibm.com/support/pages/502-error-ingress-keycloak-response
     # nginx.ingress.kubernetes.io/proxy-buffer-size: 128k
@@ -532,7 +529,7 @@ cache:
 
 proxy:
   enabled: true
-  mode: forwarded
+  mode: xforwarded
   http:
     enabled: true
 
@@ -544,7 +541,7 @@ health:
 
 http:
   # For backwards compatibility reasons we set this to the value used by previous Keycloak versions.
-  relativePath: "/auth"
+  relativePath: "/"
   # Set the relative path for Keycloak's management interface (KC_HTTP_MANAGEMENT_RELATIVE_PATH).
   # This controls the path prefix for health and metrics endpoints served on the management port (9000).
   # When empty, the env var is not set and Keycloak inherits the value from `http.relativePath`.

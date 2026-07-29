@@ -33,5 +33,5 @@ variable "user_description" {
   description = "OVH Public Cloud Project user description"
   type        = string
   nullable    = false
-  default     = "Terraform user for S3 bucket"
+  default     = "User created for S3 bucket access"
 }

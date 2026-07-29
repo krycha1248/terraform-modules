@@ -14,7 +14,7 @@ resource "ovh_cloud_project_storage" "storage" {
 
 resource "ovh_cloud_project_user" "user" {
   service_name = var.service_name
-  description  = var.user_description
+  description  = "${var.bucket_name} - ${var.user_description}"
   role_names = [
     "objectstore_operator"
   ]

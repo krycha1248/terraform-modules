@@ -49,3 +49,30 @@ variable "storage_size" {
   nullable    = false
   default     = "1Gi"
 }
+
+variable "mode" {
+  type    = string
+  default = "normal"
+  validation {
+    condition     = contains(["normal", "restore"], var.mode)
+    error_message = "mode must be normal or restore."
+  }
+}
+variable "backup_retention_policy" {
+  type    = string
+  default = "30d"
+}
+variable "backup" {
+  type = object({
+    endpoint       = string
+    bucket         = string
+    source_path    = string
+    target_path    = string
+    region         = string
+    access_key     = string
+    secret_key     = string
+    source_cluster = string
+    schedule       = string
+  })
+  default = null
+}

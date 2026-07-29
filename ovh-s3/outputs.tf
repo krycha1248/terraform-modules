@@ -2,6 +2,10 @@ output "endpoint" {
   value = "https://s3.${var.region_name}.io.cloud.ovh.net"
 }
 
+output "region_name" {
+  value = var.region_name
+}
+
 output "bucket_name" {
   value = ovh_cloud_project_storage.storage.name
 }

@@ -127,7 +127,8 @@ resource "kubernetes_manifest" "scheduled_backup" {
     }
 
     spec = {
-      schedule = var.backup.schedule
+      schedule  = var.backup.schedule
+      immediate = true
 
       backupOwnerReference = "cluster"
 

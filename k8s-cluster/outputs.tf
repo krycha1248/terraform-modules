@@ -27,3 +27,8 @@ output "kubernetes_client_key" {
   value       = ovh_cloud_project_kube.cluster.kubeconfig_attributes[0].client_key
   sensitive   = true
 }
+
+output "network_cidr" {
+  description = "The CIDR of the private network"
+  value       = ovh_cloud_project_network_private_subnet.private_subnet.cidr
+}

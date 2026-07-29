@@ -412,10 +412,10 @@ ingress:
           # serviceName: ""  # Optional: Override backend service name (e.g., for AWS ALB action annotations)
           # servicePort: ""  # Optional: Override backend service port name
   # TLS configuration
-  tls: []
-  #  - hosts:
-  #      - keycloak.example.com
-  #    secretName: ""
+  tls:
+    - hosts:
+        - ${domain_name}
+      secretName: "keycloak-tls"
 
   # ingress for console only (/auth/admin)
   console:

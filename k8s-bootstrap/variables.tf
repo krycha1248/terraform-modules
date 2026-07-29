@@ -28,6 +28,24 @@ variable "deploy_traefik" {
   default     = false
 }
 
+variable "loadbalancer_annotations" {
+  description = "Cloud provider specific annotations for Traefik LoadBalancer Service"
+  type        = map(string)
+  default     = {}
+}
+
+variable "proxy_protocol_trusted_ips" {
+  description = "Trusted IP ranges allowed to send PROXY protocol. Empty list disables PROXY protocol."
+  type        = list(string)
+  default     = []
+}
+
+variable "forwarded_headers_trusted_ips" {
+  description = "Trusted IP ranges allowed to send X-Forwarded-* headers."
+  type        = list(string)
+  default     = []
+}
+
 variable "deploy_cnpg" {
   description = "Flag to determine whether to deploy CloudNativePG."
   type        = bool

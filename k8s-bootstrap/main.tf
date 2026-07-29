@@ -13,41 +13,57 @@ resource "helm_release" "traefik" {
       service = {
         type = "LoadBalancer"
 
-        externalTrafficPolicy = "Local"
+        annotations = var.loadbalancer_annotations
 
-        annotations = {
-          "loadbalancer.openstack.org/proxy-protocol" = "v2"
+        spec = {
+          # Preserve real client source IP (otherwise pods see node/internal IPs).
+          externalTrafficPolicy = "Local"
         }
       }
 
       ports = {
-        web = {
-          proxyProtocol = {
-            trustedIPs = [
-              "0.0.0.0/0"
-            ]
-          }
+        web = merge(
+          {
+            # Allow ACME HTTP-01 challenge paths (/.well-known/acme-challenge/*)
+            # to bypass the HTTP→HTTPS redirect. Without this, Let's Encrypt
+            # gets a 301 redirect instead of the challenge token and validation fails.
+            allowACMEByPass = true
 
-          forwardedHeaders = {
-            trustedIPs = [
-              "0.0.0.0/0"
-            ]
-          }
-        }
+            http = {
+              redirections = {
+                entryPoint = {
+                  to        = "websecure"
+                  scheme    = "https"
+                  permanent = true
+                }
+              }
+            }
+          },
+          local.proxy_protocol_enabled ? {
+            proxyProtocol = {
+              trustedIPs = var.proxy_protocol_trusted_ips
+            }
+          } : {},
+          length(var.forwarded_headers_trusted_ips) > 0 ? {
+            forwardedHeaders = {
+              trustedIPs = var.forwarded_headers_trusted_ips
+            }
+          } : {}
+        )
 
-        websecure = {
-          proxyProtocol = {
-            trustedIPs = [
-              "0.0.0.0/0"
-            ]
-          }
-
-          forwardedHeaders = {
-            trustedIPs = [
-              "0.0.0.0/0"
-            ]
-          }
-        }
+        websecure = merge(
+          {},
+          local.proxy_protocol_enabled ? {
+            proxyProtocol = {
+              trustedIPs = var.proxy_protocol_trusted_ips
+            }
+          } : {},
+          length(var.forwarded_headers_trusted_ips) > 0 ? {
+            forwardedHeaders = {
+              trustedIPs = var.forwarded_headers_trusted_ips
+            }
+          } : {}
+        )
       }
     })
   ]

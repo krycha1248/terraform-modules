@@ -85,7 +85,7 @@ resource "kubernetes_manifest" "cluster" {
             }
           }
         ]
-      } : {}
+      } : tomap({})
     )
   }
 

@@ -13,12 +13,11 @@ resource "helm_release" "traefik" {
       service = {
         type = "LoadBalancer"
 
+        externalTrafficPolicy = "Local"
+
         annotations = {
           "service.beta.kubernetes.io/ovh-loadbalancer-proxy-protocol" = "v2"
-        }
-
-        spec = {
-          externalTrafficPolicy = "Local"
+          "loadbalancer.openstack.org/proxy-protocol"                  = "v2"
         }
       }
 
@@ -34,18 +33,6 @@ resource "helm_release" "traefik" {
             trustedIPs = [
               "0.0.0.0/0"
             ]
-          }
-
-          allowACMEByPass = true
-
-          http = {
-            redirections = {
-              entryPoint = {
-                to        = "websecure"
-                scheme    = "https"
-                permanent = true
-              }
-            }
           }
         }
 

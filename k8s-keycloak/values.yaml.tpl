@@ -122,15 +122,17 @@ args: ["start"]
 
 extraEnv: |
   - name: KC_HOSTNAME
-    value: "${domain_name}"
+    value: ${domain_name}
   - name: KC_HOSTNAME_STRICT
     value: "true"
-  - name: KEYCLOAK_ADMIN
-    value: "admin"
-  - name: KEYCLOAK_ADMIN_PASSWORD
-    value: "admin"
   - name: KC_PROXY_HEADERS
-    value: "forwarded"
+    value: "xforwarded"
+  - name: KC_BOOTSTRAP_ADMIN_USERNAME
+    value: "admin"
+  - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+    value: "admin"
+  - name: KC_HTTP_RELATIVE_PATH
+    value: "/auth"
 
 # Additional environment variables for Keycloak
 #extraEnv: ""

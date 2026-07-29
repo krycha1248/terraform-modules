@@ -13,50 +13,11 @@ locals {
     }
   }
 
-  backup_spec = jsondecode(jsonencode(
-    var.backup != null && var.mode == "normal" ? {
-      backup = {
-        retentionPolicy = var.backup_retention_policy
-
-        barmanObjectStore = {
-          destinationPath = "s3://${var.backup.bucket}/${var.backup.path}"
-          endpointURL     = var.backup.endpoint
-
-          s3Credentials = {
-            accessKeyId = {
-              name = kubernetes_secret_v1.backup[0].metadata[0].name
-              key  = "ACCESS_KEY_ID"
-            }
-
-            secretAccessKey = {
-              name = kubernetes_secret_v1.backup[0].metadata[0].name
-              key  = "ACCESS_SECRET_KEY"
-            }
-          }
-
-          wal = {
-            compression = "gzip"
-          }
-
-          data = {
-            compression = "gzip"
-          }
-        }
-      }
-    } : {}
-  ))
-
-  restore_spec = jsondecode(jsonencode(
-    var.mode == "restore" && var.backup != null ? {
-      bootstrap = {
-        recovery = {
-          source = "${var.cluster_name}-backup-source"
-        }
-      }
-
-      externalClusters = [
-        {
-          name = "${var.cluster_name}-backup-source"
+  backup_spec = merge(
+    {
+      for k, v in {
+        backup = {
+          retentionPolicy = var.backup_retention_policy
 
           barmanObjectStore = {
             destinationPath = "s3://${var.backup.bucket}/${var.backup.path}"
@@ -73,11 +34,58 @@ locals {
                 key  = "ACCESS_SECRET_KEY"
               }
             }
+
+            wal = {
+              compression = "gzip"
+            }
+
+            data = {
+              compression = "gzip"
+            }
           }
         }
-      ]
-    } : {}
-  ))
+      } : k => v
+
+      if var.mode == "normal" && var.backup != null
+    }
+  )
+
+  restore_spec = merge(
+    {
+      for k, v in {
+        bootstrap = {
+          recovery = {
+            source = "${var.cluster_name}-backup-source"
+          }
+        }
+
+        externalClusters = [
+          {
+            name = "${var.cluster_name}-backup-source"
+
+            barmanObjectStore = {
+              destinationPath = "s3://${var.backup.bucket}/${var.backup.path}"
+              endpointURL     = var.backup.endpoint
+
+              s3Credentials = {
+                accessKeyId = {
+                  name = kubernetes_secret_v1.backup[0].metadata[0].name
+                  key  = "ACCESS_KEY_ID"
+                }
+
+                secretAccessKey = {
+                  name = kubernetes_secret_v1.backup[0].metadata[0].name
+                  key  = "ACCESS_SECRET_KEY"
+                }
+              }
+            }
+          }
+        ]
+      } : k => v
+
+      if var.mode == "restore" && var.backup != null
+    }
+  )
 
   cluster_spec = merge(
     local.base_spec,

@@ -4,7 +4,7 @@ resource "kubernetes_namespace_v1" "namespace" {
   }
 }
 
-resource "kubernetes_manifest" "cnpg_operator" {
+resource "kubernetes_manifest" "cnpg_cluster" {
   manifest = {
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "Cluster"

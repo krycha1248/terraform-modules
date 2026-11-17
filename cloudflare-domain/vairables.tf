@@ -21,3 +21,9 @@ variable "www_subdomain_enabled" {
   type        = bool
   default     = false
 }
+
+variable "proxy" {
+  description = "Enable proxy in Cloudflare domain"
+  type        = bool
+  default     = false
+}

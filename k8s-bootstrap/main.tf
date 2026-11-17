@@ -11,13 +11,13 @@ resource "helm_release" "traefik" {
   values = [
     yamlencode({
       service = {
-        type = "LoadBalancer"
 
         annotations = var.loadbalancer_annotations
 
         spec = {
           # Preserve real client source IP (otherwise pods see node/internal IPs).
           externalTrafficPolicy = "Local"
+          type = "LoadBalancer"
         }
       }
 

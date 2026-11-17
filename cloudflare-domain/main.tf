@@ -9,6 +9,7 @@ resource "cloudflare_dns_record" "recordA" {
   type    = "A"
   content = var.ip_address
   ttl     = 1
+  proxied = var.proxy
 }
 
 resource "cloudflare_dns_record" "recordCNAME" {
@@ -18,4 +19,5 @@ resource "cloudflare_dns_record" "recordCNAME" {
   type    = "CNAME"
   content = cloudflare_dns_record.recordA.name
   ttl     = 1
+  proxied = var.proxy
 }

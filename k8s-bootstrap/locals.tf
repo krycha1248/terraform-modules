@@ -6,12 +6,12 @@ locals {
       proxyProtocol = {
         trustedIPs = var.proxy_protocol_trusted_ips
       }
-    } : {},
+    } : null,
     length(var.forwarded_headers_trusted_ips) > 0 ? {
       forwardedHeaders = {
         trustedIPs = var.forwarded_headers_trusted_ips
       }
-    } : {}
+    } : null
   )
 
   traefik_web_redirect_config = var.redirect_http_to_https ? {
@@ -29,5 +29,5 @@ locals {
         }
       }
     }
-  } : {}
+  } : null
 }

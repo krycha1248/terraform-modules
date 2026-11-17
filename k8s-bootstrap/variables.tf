@@ -28,6 +28,12 @@ variable "deploy_traefik" {
   default     = false
 }
 
+variable "redirect_http_to_https" {
+  description = "Flag to determine whether Traefik should redirect HTTP (web) traffic to HTTPS (websecure)."
+  type        = bool
+  default     = false
+}
+
 variable "loadbalancer_annotations" {
   description = "Cloud provider specific annotations for Traefik LoadBalancer Service"
   type        = map(string)

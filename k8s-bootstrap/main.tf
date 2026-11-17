@@ -11,59 +11,18 @@ resource "helm_release" "traefik" {
   values = [
     yamlencode({
       service = {
-
         annotations = var.loadbalancer_annotations
 
         spec = {
           # Preserve real client source IP (otherwise pods see node/internal IPs).
           externalTrafficPolicy = "Local"
-          type = "LoadBalancer"
+          type                  = "LoadBalancer"
         }
       }
 
       ports = {
-        web = merge(
-          {
-            # Allow ACME HTTP-01 challenge paths (/.well-known/acme-challenge/*)
-            # to bypass the HTTP→HTTPS redirect. Without this, Let's Encrypt
-            # gets a 301 redirect instead of the challenge token and validation fails.
-            allowACMEByPass = true
-
-            http = {
-              redirections = {
-                entryPoint = {
-                  to        = "websecure"
-                  scheme    = "https"
-                  permanent = true
-                }
-              }
-            }
-          },
-          local.proxy_protocol_enabled ? {
-            proxyProtocol = {
-              trustedIPs = var.proxy_protocol_trusted_ips
-            }
-          } : {},
-          length(var.forwarded_headers_trusted_ips) > 0 ? {
-            forwardedHeaders = {
-              trustedIPs = var.forwarded_headers_trusted_ips
-            }
-          } : {}
-        )
-
-        websecure = merge(
-          {},
-          local.proxy_protocol_enabled ? {
-            proxyProtocol = {
-              trustedIPs = var.proxy_protocol_trusted_ips
-            }
-          } : {},
-          length(var.forwarded_headers_trusted_ips) > 0 ? {
-            forwardedHeaders = {
-              trustedIPs = var.forwarded_headers_trusted_ips
-            }
-          } : {}
-        )
+        web       = merge(local.traefik_common_port_config, local.traefik_web_redirect_config)
+        websecure = local.traefik_common_port_config
       }
     })
   ]

@@ -21,11 +21,13 @@ resource "ovh_cloud_network_private_vrack_subnet" "private_subnet" {
   ]
 }
 
-resource "ovh_cloud_project_gateway" "gateway" {
+resource "ovh_cloud_gateway" "gateway" {
   service_name = ovh_cloud_network_private_vrack.private_network.service_name
   name         = var.gateway_name
-  model        = var.gateway_model
-  region       = var.region
-  network_id   = ovh_cloud_network_private_vrack.private_network.id
-  subnet_id    = ovh_cloud_network_private_vrack_subnet.private_subnet.id
+  external_gateway = {
+    enabled = true
+    model   = var.gateway_model
+  }
+  region     = var.region
+  subnet_ids = [ovh_cloud_network_private_vrack_subnet.private_subnet.id]
 }

@@ -1,7 +1,7 @@
 resource "ovh_cloud_project_kube" "cluster" {
   service_name       = var.service_name
   name               = var.cluster_name
-  region             = var.regions[0]
+  region             = var.region
   private_network_id = ovh_cloud_network_private_vrack.private_network.id
   nodes_subnet_id    = ovh_cloud_network_private_vrack_subnet.private_subnet.id
 

@@ -71,7 +71,7 @@ variable "gateway_model" {
   description = "OVH Public Cloud Project Kubernetes cluster gateway model"
   type        = string
   nullable    = false
-  default     = "s"
+  default     = "S"
 }
 
 variable "network_cidr" {

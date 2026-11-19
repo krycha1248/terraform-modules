@@ -2,11 +2,11 @@ resource "ovh_cloud_project_kube" "cluster" {
   service_name       = var.service_name
   name               = var.cluster_name
   region             = var.regions[0]
-  private_network_id = tolist(ovh_cloud_project_network_private.private_network.regions_attributes[*].openstackid)[0]
-  nodes_subnet_id    = ovh_cloud_project_network_private_subnet.private_subnet.id
+  private_network_id = tolist(ovh_cloud_network_private_vrack.private_network.regions_attributes[*].openstackid)[0]
+  nodes_subnet_id    = ovh_cloud_network_private_vrack_subnet.private_subnet.id
 
   private_network_configuration {
-    default_vrack_gateway              = ovh_cloud_project_network_private_subnet.private_subnet.gateway_ip
+    default_vrack_gateway              = ovh_cloud_network_private_vrack.private_subnet.gateway_ip
     private_network_routing_as_default = true
   }
 }

@@ -95,6 +95,13 @@ variable "network_end_address" {
   default     = "10.0.0.254"
 }
 
+variable "gateway_ip" {
+  description = "OVH Public Cloud Project Kubernetes cluster gateway IP address"
+  type        = string
+  nullable    = false
+  default     = "10.0.0.1"
+}
+
 variable "dhcp_enabled" {
   description = "OVH Public Cloud Project Kubernetes cluster network DHCP enabled"
   type        = bool

@@ -12,7 +12,8 @@ resource "ovh_cloud_network_private_vrack_subnet" "private_subnet" {
   network_id   = ovh_cloud_network_private_vrack.private_network.id
   region       = var.region
   dhcp_enabled = var.dhcp_enabled
-  allocation_pools = [ 
+  gateway_ip   = var.gateway_ip
+  allocation_pools = [
     {
       start = var.network_start_address
       end   = var.network_end_address
@@ -25,6 +26,6 @@ resource "ovh_cloud_project_gateway" "gateway" {
   name         = var.gateway_name
   model        = var.gateway_model
   region       = var.regions[0]
-  network_id   = tolist(ovh_cloud_network_private_vrack.private_network.regions_attributes[*].openstackid)[0]
+  network_id   = ovh_cloud_network_private_vrack.private_network.id
   subnet_id    = ovh_cloud_network_private_vrack_subnet.private_subnet.id
 }

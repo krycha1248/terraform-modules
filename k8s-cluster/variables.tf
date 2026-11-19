@@ -18,11 +18,18 @@ variable "network_name" {
   default     = "Kubernetes Private Network"
 }
 
-variable "regions" {
-  description = "OVH Public Cloud Project Network regions"
-  type        = list(string)
+variable "subnet_name" {
+  description = "OVH Public Cloud Project Subnet name"
+  type        = string
   nullable    = false
-  default     = ["WAW1"]
+  default     = "Kubernetes Private Subnet"
+}
+
+variable "region" {
+  description = "OVH Public Cloud Project Network region"
+  type        = string
+  nullable    = false
+  default     = "WAW1"
 }
 
 variable "cluster_name" {
@@ -86,4 +93,11 @@ variable "network_end_address" {
   type        = string
   nullable    = false
   default     = "10.0.0.254"
+}
+
+variable "dhcp_enabled" {
+  description = "OVH Public Cloud Project Kubernetes cluster network DHCP enabled"
+  type        = bool
+  nullable    = false
+  default     = true
 }

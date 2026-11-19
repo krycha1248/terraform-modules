@@ -1,18 +1,23 @@
-resource "ovh_cloud_project_network_private" "private_network" {
+resource "ovh_cloud_network_private_vrack" "private_network" {
   service_name = var.service_name
   vlan_id      = var.vlan_id
   name         = var.network_name
-  regions      = var.regions
+  region       = var.region
 }
 
-resource "ovh_cloud_project_network_private_subnet" "private_subnet" {
+resource "ovh_cloud_network_private_vrack_subnet" "private_subnet" {
+  cidr         = var.network_cidr
+  name         = var.subnet_name
   service_name = ovh_cloud_project_network_private.private_network.service_name
   network_id   = ovh_cloud_project_network_private.private_network.id
-  region       = var.regions[0]
-  start        = var.network_start_address
-  end          = var.network_end_address
-  network      = var.network_cidr
-  dhcp         = true
+  region       = var.region
+  dhcp_enabled = var.dhcp_enabled
+  allocation_pools = [ 
+    {
+      start = var.network_start_address
+      end   = var.network_end_address
+    }
+  ]
 }
 
 resource "ovh_cloud_project_gateway" "gateway" {

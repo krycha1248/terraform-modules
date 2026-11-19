@@ -6,7 +6,7 @@ resource "ovh_cloud_project_kube" "cluster" {
   nodes_subnet_id    = ovh_cloud_network_private_vrack_subnet.private_subnet.id
 
   private_network_configuration {
-    default_vrack_gateway              = ovh_cloud_network_private_vrack.private_subnet.gateway_ip
+    default_vrack_gateway              = ovh_cloud_network_private_vrack_subnet.private_subnet.current_state.gateway_ip
     private_network_routing_as_default = true
   }
 }

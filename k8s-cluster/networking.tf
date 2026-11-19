@@ -25,7 +25,7 @@ resource "ovh_cloud_project_gateway" "gateway" {
   service_name = ovh_cloud_network_private_vrack.private_network.service_name
   name         = var.gateway_name
   model        = var.gateway_model
-  region       = var.regions[0]
+  region       = var.region
   network_id   = ovh_cloud_network_private_vrack.private_network.id
   subnet_id    = ovh_cloud_network_private_vrack_subnet.private_subnet.id
 }

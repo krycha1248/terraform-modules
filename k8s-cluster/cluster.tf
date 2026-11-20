@@ -9,8 +9,6 @@ resource "ovh_cloud_project_kube" "cluster" {
     default_vrack_gateway              = ovh_cloud_network_private_vrack_subnet.private_subnet.current_state.gateway_ip
     private_network_routing_as_default = true
   }
-  
-  depends_on = [ovh_cloud_gateway.gateway]
 }
 
 resource "ovh_cloud_project_kube_nodepool" "node_pool_1" {
